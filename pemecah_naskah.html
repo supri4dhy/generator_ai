@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pemecah Naskah Cerita AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111827; }
+        textarea::-webkit-scrollbar,
+        .naskah-container::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track,
+        .naskah-container::-webkit-scrollbar-track { background: #1f2937; }
+        textarea::-webkit-scrollbar-thumb,
+        .naskah-container::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        textarea::-webkit-scrollbar-thumb:hover,
+        .naskah-container::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        .spinner {
+            width: 56px; height: 56px;
+            border: 6px solid #4b5563;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        /* Style untuk panah dropdown */
+        .dropdown-arrow {
+            transition: transform 0.3s ease;
+        }
+        .dropdown-arrow.toggled {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body class="text-gray-100 p-4 sm:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- HEADER APLIKASI -->
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-500">
+                Pemecah Naskah Cerita
+            </h1>
+            <p class="text-center text-gray-400 text-lg mt-2">
+                Ekstrak Cerita Mandiri dari Naskah Panjang
+            </p>
+            <!-- TAMBAHAN: Tombol Kembali ke Dashboard -->
+            <div class="text-center mt-4">
+                <a href="index.html" class="text-teal-400 hover:text-teal-300 hover:underline transition duration-300">
+                    &larr; Kembali ke Dashboard Utama
+                </a>
+            </div>
+        </header>
+
+        <!-- ============================================= -->
+        <!-- APLIKASI 2: PEMECAH NASKAH CERITA           -->
+        <!-- ============================================= -->
+        <main id="appSplitter" class="app-container">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+                <!-- KOLOM 1: INPUT NASKAH (SPLITTER) -->
+                <div class="lg:col-span-5 h-fit bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                    <h2 class="text-2xl font-semibold mb-4 text-teal-300">Input Naskah</h2>
+                    <label for="scriptInputSplitter" class="block text-sm font-medium text-gray-400 mb-2">
+                        Tempel naskah panjang Anda untuk dipecah
+                    </label>
+                    <textarea id="scriptInputSplitter" rows="15" class="w-full p-3 bg-gray-900 rounded-md border border-gray-700 focus:border-teal-500 focus:ring-teal-500 text-sm" placeholder="Kisah panjang yang berisi banyak sub-plot..."></textarea>
+                    <!-- Tombol Pecah Naskah (Akan di-update saat loading) -->
+                    <button id="splitButton" class="mt-4 w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center">
+                        Pecah Naskah
+                    </button>
+                </div>
+
+                <!-- KOLOM 2: OUTPUT (SPLITTER) -->
+                <div class="lg:col-span-7">
+                    <div id="outputContainerSplitter" class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 min-h-[400px]">
+                        <h2 class="text-2xl font-semibold mb-5 text-teal-300 border-b border-gray-700 pb-4">
+                            Hasil Cerita Mandiri (Naskah Ekstrak)
+                        </h2>
+                        
+                        <!-- Konten Hasil Splitter -->
+                        <div id="splitterResultContainer">
+                            <div id="splitterWelcomeMessage" class="text-center text-gray-400 py-10">
+                                <p class="text-lg">Klik judul cerita untuk melihat naskah dan tombol aksi.</p>
+                            </div>
+                            <div id="splitterResult" class="space-y-4"> <!-- Diubah dari space-y-6 -->
+                                <!-- Loading placeholder -->
+                                <div id="splitterLoader" class="hidden spinner mx-auto"></div>
+                                <!-- Hasil render dinamis (akordeon) -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- Variabel Global ---
+        let generatedStories = null; // <- Menyimpan data cerita mandiri
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Elemen DOM Splitter ---
+            const splitButton = document.getElementById('splitButton');
+            const scriptInputSplitter = document.getElementById('scriptInputSplitter');
+            const splitterResultContainer = document.getElementById('splitterResultContainer');
+            const splitterWelcomeMessage = document.getElementById('splitterWelcomeMessage');
+            const splitterResult = document.getElementById('splitterResult');
+            const splitterLoader = document.getElementById('splitterLoader');
+
+            // --- API Endpoint ---
+            const API_ENDPOINT = 'api_proxy.php';
+
+            // =============================================
+            // LOGIKA APLIKASI 2: SPLITTER
+            // =============================================
+            
+            // --- Event Listener Tombol Pecah (Diperbarui) ---
+            splitButton.addEventListener('click', () => {
+                const script = scriptInputSplitter.value;
+                if (!script.trim()) {
+                    showToast('Input Naskah tidak boleh kosong.', 'error');
+                    return;
+                }
+                
+                // 1. Tampilkan Indikator Loading pada Tombol
+                splitButton.disabled = true;
+                splitButton.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Memproses...
+                `;
+
+                // Reset UI
+                splitterWelcomeMessage.classList.add('hidden');
+                splitterResult.innerHTML = '';
+                splitterLoader.classList.remove('hidden'); // Tampilkan spinner utama
+                generatedStories = null; 
+                fetchSplitterData(script);
+            });
+            
+            // --- Event Listener untuk Akordeon (Dropdown) ---
+            splitterResult.addEventListener('click', (e) => {
+                const header = e.target.closest('.story-toggle-button');
+                if (header) {
+                    const index = header.dataset.index;
+                    const content = document.getElementById(`story-content-${index}`);
+                    const arrow = header.querySelector('.dropdown-arrow');
+                    
+                    if (content) {
+                        content.classList.toggle('hidden');
+                        arrow.classList.toggle('toggled');
+                    }
+                }
+            });
+
+
+            // --- Fungsi Fetch API (Splitter) ---
+            async function fetchSplitterData(script) {
+                try {
+                    const response = await fetchWithRetry(API_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ task: 'stories', script })
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ error: 'Respons server tidak valid' }));
+                        throw new Error(errorData.message || errorData.error || `HTTP error ${response.status}`);
+                    }
+                    const data = await response.json();
+                    generatedStories = data.stories; 
+                    renderSplitterData(generatedStories);
+                } catch (error) {
+                    console.error('Error pada tugas [stories]:', error);
+                    renderSplitterError(error.message);
+                } finally {
+                    splitterLoader.classList.add('hidden');
+                    // 1. Kembalikan Tombol ke Normal
+                    splitButton.disabled = false;
+                    splitButton.innerHTML = 'Pecah Naskah';
+                }
+            }
+
+            // --- Render Data (Splitter) (Diperbarui jadi Akordeon) ---
+            function renderSplitterData(stories) {
+                splitterLoader.classList.add('hidden');
+                
+                if (!stories || stories.length === 0) {
+                    splitterResult.innerHTML = `<p class="text-center text-gray-400">Gagal mengidentifikasi cerita mandiri.</p>`;
+                    return;
+                }
+
+                let storiesHtml = stories.map((story, index) => {
+                    return `
+                        <div class="bg-gray-900 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+                            <!-- Tombol Judul Dropdown (Poin 3 & 4) -->
+                            <button class="story-toggle-button w-full text-left p-4 sm:p-5 flex justify-between items-center" data-index="${index}">
+                                <h4 class="text-lg sm:text-xl font-bold text-teal-300">${story.title || 'Judul Tidak Tersedia'}</h4>
+                                <svg class="dropdown-arrow w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                            
+                            <!-- Konten Dropdown (Hidden by default) -->
+                            <div id="story-content-${index}" class="hidden p-4 sm:p-5 border-t border-gray-700">
+                                <!-- Grup Tombol Aksi -->
+                                <div class="flex-shrink-0 flex flex-col sm:flex-row gap-2 mb-4">
+                                    <button onclick="copyStoryScript(${index})" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-3 rounded-lg text-sm transition duration-300 w-full sm:w-auto">
+                                        Salin Naskah
+                                    </button>
+                                    <button onclick="saveStoryAsDoc(${index})" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-3 rounded-lg text-sm transition duration-300 w-full sm:w-auto">
+                                        Simpan Cerita (.doc)
+                                    </button>
+                                </div>
+                                
+                                <!-- Kontainer Naskah (Poin 2: "Kotak" diganti jadi div scroll) -->
+                                <label class="block text-sm font-semibold text-gray-400 mb-2">Naskah Asli (diekstrak):</label>
+                                <div classs="naskah-container w-full h-48 p-3 bg-gray-950 rounded-md border border-gray-700 overflow-y-auto">
+                                    <pre class="whitespace-pre-wrap text-sm font-mono">${story.script || ''}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                splitterResult.innerHTML = storiesHtml;
+            }
+            
+            // --- Render Error (Splitter) ---
+            function renderSplitterError(message) {
+                splitterLoader.classList.add('hidden');
+                splitterResult.innerHTML = `
+                    <div class="bg-red-900 border border-red-700 text-red-200 p-4 rounded-lg">
+                        <h4 class="font-bold">Error pada Pemecah Naskah</h4>
+                        <p class="text-sm">${message}</p>
+                    </div>
+                `;
+            }
+
+            // =============================================
+            // FUNGSI UTILITAS UMUM
+            // =============================================
+
+            /**
+             * Menyalin naskah cerita mandiri
+             */
+            window.copyStoryScript = function(index) {
+                if (!generatedStories || !generatedStories[index]) {
+                    showToast("Data cerita tidak ditemukan.", "error");
+                    return;
+                }
+                const script = generatedStories[index].script;
+                
+                navigator.clipboard.writeText(script).then(() => {
+                    showToast("Naskah cerita mandiri disalin!");
+                }).catch(err => {
+                    console.error("Gagal menyalin naskah:", err);
+                    // Fallback (jarang dibutuhkan)
+                    try {
+                        const tempText = document.createElement('textarea');
+                        tempText.value = script;
+                        document.body.appendChild(tempText);
+                        tempText.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempText);
+                        showToast("Naskah cerita mandiri disalin! (fallback)");
+                    } catch (fallbackErr) {
+                        showToast("Gagal menyalin. Coba lagi.", "error");
+                    }
+                });
+            }
+
+            /**
+             * Menyimpan satu cerita mandiri sebagai .doc
+             */
+            window.saveStoryAsDoc = function(index) {
+                if (!generatedStories || !generatedStories[index]) {
+                    showToast("Data cerita tidak ditemukan.", "error");
+                    return;
+                }
+                
+                const story = generatedStories[index];
+                const title = story.title || "Cerita Mandiri";
+                const script = story.script || "Naskah tidak tersedia.";
+
+                let docContent = `
+                    <html>
+                    <head><meta charset="UTF-8"><style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        h1 { color: #333; }
+                        pre { white-space: pre-wrap; word-wrap: break-word; background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #ddd; font-family: 'Courier New', Courier, monospace; }
+                    </style></head>
+                    <body>
+                        <h1>${title}</h1>
+                        <h3>Naskah Ekstrak</h3>
+                        <pre>${script}</pre>
+                    </body>
+                    </html>
+                `;
+
+                const blob = new Blob(['\ufeff', docContent], { type: 'application/msword' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                const fileName = title.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_');
+                link.download = `cerita_${fileName || 'mandiri'}.doc`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            /**
+             * Fungsi fetch dengan retry (exponential backoff)
+             */
+            async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+                try {
+                    return await fetch(url, options);
+                } catch (err) {
+                    if (retries > 0) {
+                        await new Promise(res => setTimeout(res, delay));
+                        return fetchWithRetry(url, options, retries - 1, delay * 2);
+                    }
+                    throw err; 
+                }
+            }
+            
+            /**
+             * Menampilkan pesan notifikasi (Toast)
+             */
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                const bgColor = type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+                toast.className = `fixed top-5 left-1/2 -translate-x-1/2 ${bgColor} text-white py-3 px-6 rounded-lg shadow-lg z-50 transition-all duration-300 opacity-0 transform -translate-y-10`;
+                toast.innerText = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translate(-50%, 0)';
+                }, 100);
+
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translate(-50%, -40px)';
+                    setTimeout(() => document.body.removeChild(toast), 300);
+                }, 3000); 
+            }
+        });
+    </script>
+</body>
+</html>

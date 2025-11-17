@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Rangkaian Adegan AI (SORA + VEO)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111827; }
+        .tab-button.active { background-color: #3b82f6; color: #ffffff; }
+        .tab-button { background-color: #374151; color: #d1d5db; }Q
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track { background: #1f2937; }
+        textarea::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        textarea::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        .spinner {
+            width: 56px; height: 56px;
+            border: 6px solid #4b5563;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="text-gray-100 p-4 sm:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- HEADER APLIKASI -->
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                Generator Rangkaian Adegan
+            </h1>
+            <p class="text-center text-gray-400 text-lg mt-2">
+                (SORA + VEO)
+            </p>
+            <!-- TAMBAHAN: Tombol Kembali ke Dashboard -->
+            <div class="text-center mt-4">
+                <a href="index.html" class="text-blue-400 hover:text-blue-300 hover:underline transition duration-300">
+                    &larr; Kembali ke Dashboard Utama
+                </a>
+            </div>
+        </header>
+
+        <!-- ============================================= -->
+        <!-- APLIKASI 1: GENERATOR RANGKAIAN ADEGAN      -->
+        <!-- ============================================= -->
+        <main id="appGenerator" class="app-container">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+                <!-- KOLOM 1: INPUT NASKAH (GENERATOR) -->
+                <div class="lg:col-span-5 h-fit bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                    <h2 class="text-2xl font-semibold mb-4 text-blue-300">Input Naskah</h2>
+                    <label for="scriptInputGenerator" class="block text-sm font-medium text-gray-400 mb-2">
+                        Tempel naskah mentah Anda (Bisa Bahasa Jawa / Indonesia)
+                    </label>
+                    <textarea id="scriptInputGenerator" rows="15" class="w-full p-3 bg-gray-900 rounded-md border border-gray-700 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="Kisah dimulai..."></textarea>
+                    <button id="generateButton" class="mt-4 w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">
+                        Buat Rangkaian Adegan
+                    </button>
+                </div>
+
+                <!-- KOLOM 2: OUTPUT (GENERATOR) -->
+                <div class="lg:col-span-7">
+                    <div id="outputContainerGenerator" class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 min-h-[400px]">
+                        
+                        <!-- Header Tab dan Tombol Simpan -->
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-5 border-b border-gray-700 pb-4">
+                            <div class="flex space-x-2 mb-3 sm:mb-0" id="tabButtonsGenerator">
+                                <button data-tab="seo" class="tab-button active py-2 px-4 rounded-md font-semibold text-sm transition duration-300">SEO</button>
+                                <button data-tab="short" class="tab-button py-2 px-4 rounded-md font-semibold text-sm transition duration-300">Versi Pendek</button>
+                                <button data-tab="long" class="tab-button py-2 px-4 rounded-md font-semibold text-sm transition duration-300">Versi Panjang</button>
+                            </div>
+                            <!-- Tombol Simpan -->
+                            <button id="saveDocButton" class="hidden bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition duration-300 ml-4 mb-1">
+                                Simpan Semua (.doc)
+                            </button>
+                        </div>
+
+                        <!-- Konten Tab -->
+                        <div id="tabContentGenerator">
+                            <div id="welcomeMessage" class="text-center text-gray-400 py-10">
+                                <p class="text-lg">Hasil SEO, Versi Pendek, dan Versi Panjang akan muncul di sini setelah naskah diproses.</p>
+                            </div>
+                            
+                            <!-- Hasil SEO -->
+                            <div id="seoResult" class="tab-pane active-tab p-1">
+                                <div class="loading-placeholder spinner mx-auto"></div>
+                            </div>
+                            
+                            <!-- Hasil Versi Pendek -->
+                            <div id="shortResult" class="tab-pane hidden p-1">
+                                <div class="loading-placeholder spinner mx-auto"></div>
+                            </div>
+                            
+                            <!-- Hasil Versi Panjang -->
+                            <div id="longResult" class="tab-pane hidden p-1">
+                                <div class="loading-placeholder spinner mx-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- Variabel Global ---
+        let generatedData = { seo: null, short: null, long: null };
+        let scriptInputGenerator;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Elemen DOM Generator ---
+            const generateButton = document.getElementById('generateButton');
+            scriptInputGenerator = document.getElementById('scriptInputGenerator'); 
+            const outputContainerGenerator = document.getElementById('outputContainerGenerator');
+            const saveDocButton = document.getElementById('saveDocButton');
+            const tabButtonsGenerator = document.getElementById('tabButtonsGenerator');
+            const tabContentGenerator = document.getElementById('tabContentGenerator');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            
+            const resultsGenerator = {
+                seo: document.getElementById('seoResult'),
+                short: document.getElementById('shortResult'),
+                long: document.getElementById('longResult')
+            };
+            const loadersGenerator = {
+                seo: resultsGenerator.seo.querySelector('.loading-placeholder'),
+                short: resultsGenerator.short.querySelector('.loading-placeholder'),
+                long: resultsGenerator.long.querySelector('.loading-placeholder')
+            };
+            
+            // --- State Aplikasi ---
+            let taskTracker = { seo: false, short: false, long: false };
+
+            // --- API Endpoint ---
+            const API_ENDPOINT = 'api_proxy.php';
+
+            // =============================================
+            // LOGIKA APLIKASI 1: GENERATOR
+            // =============================================
+
+            // --- Event Listener Tombol Generate ---
+            generateButton.addEventListener('click', () => {
+                const script = scriptInputGenerator.value;
+                if (!script.trim()) {
+                    showToast('Input Naskah tidak boleh kosong.', 'error');
+                    return;
+                }
+                resetGeneratorUI();
+                fetchApiData('seo', script);
+                fetchApiData('short', script);
+                fetchApiData('long', script);
+            });
+
+            // --- Event Listener Tab ---
+            tabButtonsGenerator.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const tab = e.target.dataset.tab;
+                    tabButtonsGenerator.querySelectorAll('button').forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.classList.add('tab-button');
+                    });
+                    e.target.classList.add('active');
+                    e.target.classList.remove('tab-button');
+                    tabContentGenerator.querySelectorAll('.tab-pane').forEach(pane => {
+                        pane.classList.add('hidden');
+                    });
+                    resultsGenerator[tab].classList.remove('hidden');
+                }
+            });
+
+            // --- Fungsi Fetch API (Generator) ---
+            async function fetchApiData(task, script) {
+                taskTracker[task] = false; 
+
+                try {
+                    const response = await fetchWithRetry(API_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ task, script })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ error: 'Respons server tidak valid' }));
+                        throw new Error(errorData.message || errorData.error || `HTTP error ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    generatedData[task] = data;
+                    renderData(task, data);
+                    taskTracker[task] = true;
+
+                } catch (error) {
+                    console.error(`Error pada tugas [${task}]:`, error);
+                    renderError(task, error.message);
+                    taskTracker[task] = true; 
+                }
+                checkAllTasksDone();
+            }
+
+            // --- Reset UI (Generator) ---
+            function resetGeneratorUI() {
+                welcomeMessage.classList.add('hidden');
+                saveDocButton.classList.add('hidden');
+                taskTracker = { seo: false, short: false, long: false };
+                generatedData = { seo: null, short: null, long: null };
+                ['seo', 'short', 'long'].forEach(task => {
+                    resultsGenerator[task].innerHTML = '<div class="loading-placeholder spinner mx-auto"></div>';
+                    if (task !== 'seo') {
+                        resultsGenerator[task].classList.add('hidden');
+                    } else {
+                        resultsGenerator[task].classList.remove('hidden');
+                    }
+                });
+                tabButtonsGenerator.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.add('tab-button');
+                    if (btn.dataset.tab === 'seo') {
+                        btn.classList.add('active');
+                        btn.classList.remove('tab-button');
+                    }
+                });
+            }
+
+            // --- Render Data (Generator) ---
+            function renderData(task, data) {
+                const resultEl = resultsGenerator[task];
+                resultEl.innerHTML = ''; 
+
+                try {
+                    if (task === 'seo') {
+                        renderSeo(data);
+                    } else if (task === 'short' || task === 'long') {
+                        renderScenes(task, data.scenes);
+                    }
+                } catch (renderError) {
+                    console.error(`Gagal merender [${task}]:`, renderError);
+                    renderError(task, `Gagal merender data. Error: ${renderError.message}`);
+                }
+            }
+
+            function renderSeo(data) {
+                resultsGenerator.seo.innerHTML = `
+                    <div class="space-y-5">
+                        ${renderCopyBlock('Judul', 'seo-title', data.title)}
+                        ${renderCopyBlock('Deskripsi', 'seo-desc', data.description, true)}
+                        ${renderCopyBlock('Tags', 'seo-tags', data.tags.join(', '))}
+                        ${renderCopyBlock('Hashtags', 'seo-hash', data.hashtags.join(' '))}
+                    </div>
+                `;
+            }
+
+            function renderScenes(type, scenes) {
+                const results = resultsGenerator[type];
+                results.classList.remove('hidden');
+                if (!scenes || scenes.length === 0) {
+                    results.innerHTML = `<p class="text-center text-gray-400">Gagal menghasilkan adegan.</p>`;
+                    return;
+                }
+                let scenesHtml = scenes.map((scene, index) => {
+                    const sceneId = `${type}-scene-${index}`;
+                    return `
+                        <div class="bg-gray-800 p-5 rounded-lg shadow-lg mb-4 border border-gray-700">
+                            <h4 class="text-xl font-bold text-blue-300 mb-4">Adegan ${scene.scene}</h4>
+                            <div class="space-y-4">
+                                ${renderCopyBlock(`Narasi (ID)`, `${sceneId}-narasi`, scene.narasi, true)}
+                                ${renderCopyBlock(`Prompt SORA (EN)`, `${sceneId}-sora`, scene.sora_prompt, true)}
+                                ${renderCopyBlock(`Prompt VEO (EN)`, `${sceneId}-veo`, scene.veo_prompt, true)}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                results.innerHTML = scenesHtml;
+            }
+
+            function renderCopyBlock(label, id, content, isTextarea = false) {
+                const safeContent = content || '';
+                const element = isTextarea 
+                    ? `<textarea id="${id}" readonly class="w-full h-24 p-3 bg-gray-900 rounded-md border border-gray-700 text-sm">${safeContent}</textarea>`
+                    : `<input id="${id}" type="text" readonly value="${safeContent}" class="w-full p-3 bg-gray-900 rounded-md border border-gray-700 text-sm">`;
+                return `
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-semibold text-gray-400">${label}</label>
+                            <button onclick="copyToClipboard('${id}')" class="bg-gray-600 hover:bg-blue-600 text-white text-xs font-medium py-1 px-3 rounded-md transition duration-300">Salin</button>
+                        </div>
+                        ${element}
+                    </div>
+                `;
+            }
+
+            function renderError(task, message) {
+                const resultEl = resultsGenerator[task];
+                resultEl.innerHTML = `
+                    <div class="bg-red-900 border border-red-700 text-red-200 p-4 rounded-lg">
+                        <h4 class="font-bold">Error pada Tugas [${task.toUpperCase()}]</h4>
+                        <p class="text-sm">${message}</p>
+                    </div>
+                `;
+            }
+
+            function checkAllTasksDone() {
+                const allDone = Object.values(taskTracker).every(status => status === true);
+                if (allDone) {
+                    if (generatedData.seo && generatedData.short && generatedData.long) {
+                        saveDocButton.classList.remove('hidden');
+                    } else {
+                        showToast('Beberapa tugas gagal, file .doc tidak dapat dibuat.', 'error');
+                    }
+                }
+            }
+
+            saveDocButton.addEventListener('click', () => {
+                if (generatedData.seo && generatedData.short && generatedData.long) {
+                    saveAsDoc(generatedData);
+                } else {
+                    showToast('Data tidak lengkap, tidak dapat menyimpan file.', 'error');
+                }
+            });
+
+            function saveAsDoc(data) {
+                let docContent = `<html><head><meta charset="UTF-8"><style>body { font-family: Arial, sans-serif; margin: 20px; } h1 { color: #333; } h2 { color: #555; border-bottom: 1px solid #ccc; padding-bottom: 5px; } h3 { color: #666; } h4 { margin-bottom: 5px; } .group { margin-bottom: 25px; border: 1px solid #eee; padding: 15px; border-radius: 5px; } .label { font-weight: bold; color: #444; margin-bottom: 5px; } .content { margin-bottom: 15px; } pre { white-space: pre-wrap; word-wrap: break-word; background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #ddd; }</style></head><body>`;
+                docContent += `<h1>Laporan Rangkaian Adegan (SORA + VEO)</h1><h2>Bagian 1: Data SEO YouTube</h2><div class='group'><p class='label'>Judul:</p><p class='content'>${data.seo.title}</p><p class='label'>Deskripsi:</p><p class='content'><pre>${data.seo.description}</pre></p><p class='label'>Tags:</p><p class='content'>${data.seo.tags.join(', ')}</p><p class='label'>Hashtags:</p><p class='content'>${data.seo.hashtags.join(' ')}</p></div>`;
+                docContent += "<h2>Bagian 2: Rangkaian Adegan (Versi Pendek)</h2>";
+                data.short.scenes.forEach(scene => {
+                    docContent += `<div class='group'><h3>Adegan ${scene.scene}</h3><p class='label'>Narasi (ID):</p><p class='content'><pre>${scene.narasi}</pre></p><p class='label'>Prompt SORA (EN):</p><p class='content'><pre>${scene.sora_prompt}</pre></p><p class='label'>Prompt VEO (EN):</p><p class='content'><pre>${scene.veo_prompt}</pre></p></div>`;
+                });
+                docContent += "<h2>Bagian 3: Rangkaian Adegan (Versi Panjang)</h2>";
+                data.long.scenes.forEach(scene => {
+                    docContent += `<div class='group'><h3>Adegan ${scene.scene}</h3><p class='label'>Narasi (ID):</p><p class='content'><pre>${scene.narasi}</pre></p><p class='label'>Prompt SORA (EN):</p><p class='content'><pre>${scene.sora_prompt}</pre></p><p class='label'>Prompt VEO (EN):</p><p class='content'><pre>${scene.veo_prompt}</pre></p></div>`;
+                });
+                docContent += "</body></html>";
+                const blob = new Blob(['\ufeff', docContent], { type: 'application/msword' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'rangkaian_adegan.doc';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            // =============================================
+            // FUNGSI UTILITAS UMUM
+            // =============================================
+
+            /**
+             * Fungsi fetch dengan retry (exponential backoff)
+             */
+            async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+                try {
+                    return await fetch(url, options);
+                } catch (err) {
+                    if (retries > 0) {
+                        await new Promise(res => setTimeout(res, delay));
+                        return fetchWithRetry(url, options, retries - 1, delay * 2);
+                    }
+                    throw err; 
+                }
+            }
+            
+            /**
+             * Menampilkan pesan notifikasi (Toast)
+             */
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                const bgColor = type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+                toast.className = `fixed top-5 left-1/2 -translate-x-1/2 ${bgColor} text-white py-3 px-6 rounded-lg shadow-lg z-50 transition-all duration-300 opacity-0 transform -translate-y-10`;
+                toast.innerText = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translate(-50%, 0)';
+                }, 100);
+
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translate(-50%, -40px)';
+                    setTimeout(() => document.body.removeChild(toast), 300);
+                }, 3000); 
+            }
+        });
+
+        /**
+         * Fungsi global untuk menyalin (dari Generator Utama)
+         */
+        function copyToClipboard(elementId) {
+            const input = document.getElementById(elementId);
+            const isTextarea = input.tagName === 'TEXTAREA';
+            
+            if (isTextarea) {
+                input.select();
+            } else {
+                input.setSelectionRange(0, 99999); 
+            }
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(input.value);
+                } else {
+                    document.execCommand('copy');
+                }
+                const button = input.previousElementSibling.querySelector('button');
+                if (button) {
+                    const originalText = button.innerText;
+                    button.innerText = 'Tersalin!';
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-gray-600', 'hover:bg-blue-600');
+                    setTimeout(() => {
+                        button.innerText = originalText;
+                        button.classList.remove('bg-green-600');
+                        button.classList.add('bg-gray-600', 'hover:bg-blue-600');
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('Gagal menyalin:', err);
+            }
+            if (isTextarea) {
+                input.blur();
+            } else {
+                window.getSelection().removeAllRanges();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Generator AI (SORA + VEO)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+        }
+    </style>
+</head>
+<body class="text-gray-100 p-4 sm:p-8 min-h-screen flex items-center justify-center">
+
+    <div class="max-w-4xl mx-auto w-full">
+        <!-- HEADER APLIKASI -->
+        <header class="mb-10">
+            <h1 class="text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                Dashboard Generator AI
+            </h1>
+            <p class="text-center text-gray-400 text-xl mt-3">
+                Pilih alat yang ingin Anda gunakan
+            </p>
+        </header>
+
+        <!-- ============================================= -->
+        <!-- MENU UTAMA (PENGGANTI DASHBOARD LAMA)       -->
+        <!-- ============================================= -->
+        <main>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- KARTU 1: GENERATOR ADEGAN -->
+                <a href="generator_adegan.html" class="block bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 transition duration-300 transform hover:scale-105 hover:border-blue-500">
+                    <div class="flex items-center mb-4">
+                        <!-- Ikon (Sparkles) -->
+                        <svg class="w-10 h-10 text-blue-400 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L24.99 5.25l-.813 2.846a4.5 4.5 0 00-3.09 3.09L18.25 12l.813-2.846a4.5 4.5 0 00-3.09-3.09L13.12 5.25l-.813 2.846a4.5 4.5 0 00-3.09 3.09L6.37 12l2.846.813a4.5 4.5 0 003.09 3.09L13.12 18.75l.813-2.846a4.5 4.5 0 003.09-3.09L18.25 12z" />
+                        </svg>
+                        <h2 class="text-2xl font-bold text-blue-300">Generator Rangkaian Adegan</h2>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        Buat data SEO, rangkaian adegan versi pendek, dan versi panjang dari naskah Anda.
+                    </p>
+                    <div class="text-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
+                        Buka Generator
+                    </div>
+                </a>
+
+                <!-- KARTU 2: PEMECAH NASKAH -->
+                <a href="pemecah_naskah.html" class="block bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 transition duration-300 transform hover:scale-105 hover:border-teal-500">
+                    <div class="flex items-center mb-4">
+                        <!-- Ikon (Scissors) -->
+                        <svg class="w-10 h-10 text-teal-400 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M7.875 14.25l-2.625 2.625a.375.375 0 000 .53l4.125 4.125a.375.375 0 00.53 0l2.625-2.625M7.875 14.25l-2.625 2.625a.375.375 0 000 .53l4.125 4.125a.375.375 0 00.53 0l2.625-2.625M7.875 14.25l2.625-2.625a.375.375 0 000-.53l-4.125-4.125a.375.375 0 00-.53 0L2.25 11.125a.375.375 0 000 .53L4.875 14.25M7.875 14.25L12 18.375m-4.125-4.125L12 9.625m0 0l2.625 2.625a.375.375 0 00.53 0l4.125-4.125a.375.375 0 000-.53L16.5 4.875a.375.375 0 00-.53 0L12 7.5m0 2.125L9.375 7.5M12 9.625l2.625-2.625a.375.375 0 000-.53L10.5 2.25a.375.375 0 00-.53 0L7.375 4.875a.375.375 0 000 .53L9.375 7.5M12 9.625l-2.625 2.625" />
+                        </svg>
+                        <h2 class="text-2xl font-bold text-teal-300">Pemecah Naskah Cerita</h2>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        Ekstrak beberapa naskah cerita mandiri dari satu naskah panjang untuk diproses.
+                    </p>
+                    <div class="text-center bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg">
+                        Buka Pemecah Naskah
+                    </div>
+                </a>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>
