@@ -9,7 +9,7 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #111827; }
         .tab-button.active { background-color: #3b82f6; color: #ffffff; }
-        .tab-button { background-color: #374151; color: #d1d5db; }Q
+        .tab-button { background-color: #374151; color: #d1d5db; }
         textarea::-webkit-scrollbar { width: 8px; }
         textarea::-webkit-scrollbar-track { background: #1f2937; }
         textarea::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
@@ -22,6 +22,14 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* BARU: Style untuk panah dropdown (Akordeon) */
+        .dropdown-arrow {
+            transition: transform 0.3s ease;
+        }
+        .dropdown-arrow.toggled {
+            transform: rotate(90deg);
+        }
     </style>
 </head>
 <body class="text-gray-100 p-4 sm:p-8">
@@ -35,7 +43,6 @@
             <p class="text-center text-gray-400 text-lg mt-2">
                 (SORA + VEO)
             </p>
-            <!-- TAMBAHAN: Tombol Kembali ke Dashboard -->
             <div class="text-center mt-4">
                 <a href="index.html" class="text-blue-400 hover:text-blue-300 hover:underline transition duration-300">
                     &larr; Kembali ke Dashboard Utama
@@ -72,7 +79,6 @@
                                 <button data-tab="short" class="tab-button py-2 px-4 rounded-md font-semibold text-sm transition duration-300">Versi Pendek</button>
                                 <button data-tab="long" class="tab-button py-2 px-4 rounded-md font-semibold text-sm transition duration-300">Versi Panjang</button>
                             </div>
-                            <!-- Tombol Simpan -->
                             <button id="saveDocButton" class="hidden bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition duration-300 ml-4 mb-1">
                                 Simpan Semua (.doc)
                             </button>
@@ -81,7 +87,7 @@
                         <!-- Konten Tab -->
                         <div id="tabContentGenerator">
                             <div id="welcomeMessage" class="text-center text-gray-400 py-10">
-                                <p class="text-lg">Hasil SEO, Versi Pendek, dan Versi Panjang akan muncul di sini setelah naskah diproses.</p>
+                                <p class="text-lg">Hasil SEO dan Rangkaian Adegan akan muncul di sini.</p>
                             </div>
                             
                             <!-- Hasil SEO -->
@@ -91,11 +97,13 @@
                             
                             <!-- Hasil Versi Pendek -->
                             <div id="shortResult" class="tab-pane hidden p-1">
+                                <!-- Konten akan dirender sebagai akordeon -->
                                 <div class="loading-placeholder spinner mx-auto"></div>
                             </div>
                             
                             <!-- Hasil Versi Panjang -->
                             <div id="longResult" class="tab-pane hidden p-1">
+                                <!-- Konten akan dirender sebagai akordeon -->
                                 <div class="loading-placeholder spinner mx-auto"></div>
                             </div>
                         </div>
@@ -172,6 +180,21 @@
                 }
             });
 
+            // --- BARU: Event Listener untuk Akordeon Adegan ---
+            tabContentGenerator.addEventListener('click', (e) => {
+                const header = e.target.closest('.scene-toggle-button');
+                if (header) {
+                    const contentId = header.dataset.content; // Mendapat ID konten
+                    const content = document.getElementById(contentId);
+                    const arrow = header.querySelector('.dropdown-arrow');
+                    
+                    if (content) {
+                        content.classList.toggle('hidden'); // Tampilkan/sembunyikan
+                        arrow.classList.toggle('toggled'); // Putar panah
+                    }
+                }
+            });
+
             // --- Fungsi Fetch API (Generator) ---
             async function fetchApiData(task, script) {
                 taskTracker[task] = false; 
@@ -235,7 +258,7 @@
                     if (task === 'seo') {
                         renderSeo(data);
                     } else if (task === 'short' || task === 'long') {
-                        renderScenes(task, data.scenes);
+                        renderScenes(task, data.scenes); // Panggil fungsi render akordeon
                     }
                 } catch (renderError) {
                     console.error(`Gagal merender [${task}]:`, renderError);
@@ -254,36 +277,67 @@
                 `;
             }
 
+            /**
+             * BARU: Merender daftar adegan sebagai AKORDEON
+             */
             function renderScenes(type, scenes) {
                 const results = resultsGenerator[type];
                 results.classList.remove('hidden');
+                
                 if (!scenes || scenes.length === 0) {
                     results.innerHTML = `<p class="text-center text-gray-400">Gagal menghasilkan adegan.</p>`;
                     return;
                 }
+                
+                // Buat kontainer untuk akordeon
+                results.innerHTML = '<div class="space-y-2"></div>';
+                const container = results.querySelector('.space-y-2');
+
                 let scenesHtml = scenes.map((scene, index) => {
                     const sceneId = `${type}-scene-${index}`;
+                    const narasiId = `${sceneId}-narasi`;
+                    const contentId = `scene-content-${type}-${index}`; // ID unik untuk konten
+                    
+                    // Gunakan judul baru dari API, dengan fallback
+                    const sceneTitle = scene.title 
+                        ? `Adegan ${scene.scene}: ${scene.title}` 
+                        : `Adegan ${scene.scene}`;
+
                     return `
-                        <div class="bg-gray-800 p-5 rounded-lg shadow-lg mb-4 border border-gray-700">
-                            <h4 class="text-xl font-bold text-blue-300 mb-4">Adegan ${scene.scene}</h4>
-                            <div class="space-y-4">
-                                ${renderCopyBlock(`Narasi (ID)`, `${sceneId}-narasi`, scene.narasi, true)}
-                                ${renderCopyBlock(`Prompt SORA (EN)`, `${sceneId}-sora`, scene.sora_prompt, true)}
-                                ${renderCopyBlock(`Prompt VEO (EN)`, `${sceneId}-veo`, scene.veo_prompt, true)}
+                        <div class="bg-gray-900 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+                            <!-- Tombol Judul Dropdown -->
+                            <button class="scene-toggle-button w-full text-left p-4 sm:p-5 flex justify-between items-center" data-content="${contentId}">
+                                <h4 class="text-lg sm:text-xl font-bold text-blue-300">${sceneTitle}</h4>
+                                <svg class="dropdown-arrow w-5 h-5 sm:w-6 sm:h-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                            
+                            <!-- Konten Dropdown (Hidden by default) -->
+                            <div id="${contentId}" class="hidden p-4 sm:p-5 border-t border-gray-700">
+                                <div class="space-y-4">
+                                    ${renderCopyBlock(`Narasi (ID)`, narasiId, scene.narasi, true)}
+                                    ${renderCopyBlock(`Prompt SORA (EN)`, `${sceneId}-sora`, scene.sora_prompt, true)}
+                                    ${renderCopyBlock(`Prompt VEO (EN)`, `${sceneId}-veo`, scene.veo_prompt, true)}
+                                </div>
                             </div>
                         </div>
                     `;
                 }).join('');
-                results.innerHTML = scenesHtml;
+                
+                container.innerHTML = scenesHtml;
             }
 
+            /**
+             * Helper untuk membuat blok Salin
+             */
             function renderCopyBlock(label, id, content, isTextarea = false) {
                 const safeContent = content || '';
                 const element = isTextarea 
                     ? `<textarea id="${id}" readonly class="w-full h-24 p-3 bg-gray-900 rounded-md border border-gray-700 text-sm">${safeContent}</textarea>`
                     : `<input id="${id}" type="text" readonly value="${safeContent}" class="w-full p-3 bg-gray-900 rounded-md border border-gray-700 text-sm">`;
                 return `
-                    <div>
+                    <div class="mt-4">
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-semibold text-gray-400">${label}</label>
                             <button onclick="copyToClipboard('${id}')" class="bg-gray-600 hover:bg-blue-600 text-white text-xs font-medium py-1 px-3 rounded-md transition duration-300">Salin</button>
@@ -326,13 +380,18 @@
                 let docContent = `<html><head><meta charset="UTF-8"><style>body { font-family: Arial, sans-serif; margin: 20px; } h1 { color: #333; } h2 { color: #555; border-bottom: 1px solid #ccc; padding-bottom: 5px; } h3 { color: #666; } h4 { margin-bottom: 5px; } .group { margin-bottom: 25px; border: 1px solid #eee; padding: 15px; border-radius: 5px; } .label { font-weight: bold; color: #444; margin-bottom: 5px; } .content { margin-bottom: 15px; } pre { white-space: pre-wrap; word-wrap: break-word; background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #ddd; }</style></head><body>`;
                 docContent += `<h1>Laporan Rangkaian Adegan (SORA + VEO)</h1><h2>Bagian 1: Data SEO YouTube</h2><div class='group'><p class='label'>Judul:</p><p class='content'>${data.seo.title}</p><p class='label'>Deskripsi:</p><p class='content'><pre>${data.seo.description}</pre></p><p class='label'>Tags:</p><p class='content'>${data.seo.tags.join(', ')}</p><p class='label'>Hashtags:</p><p class='content'>${data.seo.hashtags.join(' ')}</p></div>`;
                 docContent += "<h2>Bagian 2: Rangkaian Adegan (Versi Pendek)</h2>";
+                
+                // Diperbarui untuk menyertakan Judul di .doc
                 data.short.scenes.forEach(scene => {
-                    docContent += `<div class='group'><h3>Adegan ${scene.scene}</h3><p class='label'>Narasi (ID):</p><p class='content'><pre>${scene.narasi}</pre></p><p class='label'>Prompt SORA (EN):</p><p class='content'><pre>${scene.sora_prompt}</pre></p><p class='label'>Prompt VEO (EN):</p><p class='content'><pre>${scene.veo_prompt}</pre></p></div>`;
+                    const sceneTitle = scene.title ? `Adegan ${scene.scene}: ${scene.title}` : `Adegan ${scene.scene}`;
+                    docContent += `<div class='group'><h3>${sceneTitle}</h3><p class='label'>Narasi (ID):</p><p class='content'><pre>${scene.narasi}</pre></p><p class='label'>Prompt SORA (EN):</p><p class='content'><pre>${scene.sora_prompt}</pre></p><p class='label'>Prompt VEO (EN):</p><p class='content'><pre>${scene.veo_prompt}</pre></p></div>`;
                 });
                 docContent += "<h2>Bagian 3: Rangkaian Adegan (Versi Panjang)</h2>";
                 data.long.scenes.forEach(scene => {
-                    docContent += `<div class='group'><h3>Adegan ${scene.scene}</h3><p class='label'>Narasi (ID):</p><p class='content'><pre>${scene.narasi}</pre></p><p class='label'>Prompt SORA (EN):</p><p class='content'><pre>${scene.sora_prompt}</pre></p><p class='label'>Prompt VEO (EN):</p><p class='content'><pre>${scene.veo_prompt}</pre></p></div>`;
+                    const sceneTitle = scene.title ? `Adegan ${scene.scene}: ${scene.title}` : `Adegan ${scene.scene}`;
+                    docContent += `<div class='group'><h3>${sceneTitle}</h3><p class='label'>Narasi (ID):</p><p class='content'><pre>${scene.narasi}</pre></p><p class='label'>Prompt SORA (EN):</p><p class='content'><pre>${scene.sora_prompt}</pre></p><p class='label'>Prompt VEO (EN):</p><p class='content'><pre>${scene.veo_prompt}</pre></p></div>`;
                 });
+                
                 docContent += "</body></html>";
                 const blob = new Blob(['\ufeff', docContent], { type: 'application/msword' });
                 const link = document.createElement('a');
@@ -346,10 +405,6 @@
             // =============================================
             // FUNGSI UTILITAS UMUM
             // =============================================
-
-            /**
-             * Fungsi fetch dengan retry (exponential backoff)
-             */
             async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
                 try {
                     return await fetch(url, options);
@@ -362,9 +417,6 @@
                 }
             }
             
-            /**
-             * Menampilkan pesan notifikasi (Toast)
-             */
             function showToast(message, type = 'success') {
                 const toast = document.createElement('div');
                 const bgColor = type === 'error' ? 'bg-red-600' : 'bg-blue-600';
@@ -385,9 +437,6 @@
             }
         });
 
-        /**
-         * Fungsi global untuk menyalin (dari Generator Utama)
-         */
         function copyToClipboard(elementId) {
             const input = document.getElementById(elementId);
             const isTextarea = input.tagName === 'TEXTAREA';
@@ -404,7 +453,10 @@
                 } else {
                     document.execCommand('copy');
                 }
-                const button = input.previousElementSibling.querySelector('button');
+                
+                // Cari tombol salin yang relevan
+                const button = Array.from(input.parentElement.querySelectorAll('button')).find(btn => btn.innerText.includes('Salin'));
+                
                 if (button) {
                     const originalText = button.innerText;
                     button.innerText = 'Tersalin!';

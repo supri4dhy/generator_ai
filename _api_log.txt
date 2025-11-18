@@ -1,0 +1,52 @@
+TASK: story_idea | MODE: script | HTTP: 200
+
+RESPONSE: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"judul\": \"Jaket Denim dan Janji yang Retak\",\n  \"sinopsis\": \"Arya dan Rizki, sahabat sejak SMP, mendapati persahabatan mereka diuji ketika keduanya jatuh cinta pada Sinta. Meskipun awalnya berusaha saling mengalah, kecemburuan dan salah paham membawa mereka pada pengkhianatan kecil, yang pada akhirnya justru menunjukkan bentuk kasih sayang yang baru dan tersembunyi.\",\n  \"karakter\": [\n    \"ARYA: Rambut hitam pendek, selalu memakai jaket denim biru muda, jam tangan digital hitam.\",\n    \"RIZKI: Rambut coklat medium, selalu memakai sweater rajut abu-abu, kacamata bingkai tipis emas.\",\n    \"SINTA: Rambut panjang bergelombang warna coklat madu, dress floral musim panas, membawa buku sketsa.\"\n  ],\n  \"scenes\": [\n    {\n      \"scene\": \"1\",\n      \"title\": \"Awal Musim Panas\",\n      \"dialog_narasi\": \"ARYA: Hei, lihat dia. Dia selalu menggambar di sana. RIZKI: (Tersenyum tipis) Ya. Dia terlihat... damai. ARYA: Kita dekati saja. Siapa cepat dia dapat, kan? RIZKI: (Menatap Arya, ekspresinya berubah) Tentu.\",\n      \"sora_prompt\": \"Two high school boys, ARYA (short black hair, light blue denim jacket, black digital watch) and RIZKI (medium brown hair, grey knit sweater, thin gold-framed glasses), are sitting on a park bench, laughing. They both turn their heads to look at SINTA (long honey-brown wavy hair, summer floral dress, holding a sketch book) sitting under a large tree. Cinematic lighting, 4K, vivid colors.\",\n      \"veo_prompt\": \"A wide shot of a sunny park. ARYA (short black hair, light blue denim jacket, black digital watch) nudges RIZKI (medium brown hair, grey knit sweater, thin gold-framed glasses). Both boys are observing SINTA (long honey-brown wavy hair, summer floral dress, holding a sketch book) from afar. The atmosphere is warm and slightly nostalgic. High contrast film grain.\"\n    },\n    {\n      \"scene\": \"2\",\n      \"title\": \"Kopi di Perpustakaan\",\n      \"dialog_narasi\": \"RIZKI: Aku rasa... kau lebih cocok dengannya, Ya. Aku akan mundur. ARYA: (Mengaduk kopi dengan gelisah) Jangan konyol, Riz. Kita sudah janji tidak ada yang mengalah. Kita harus adil. RIZKI: Adil itu menyakitkan, Ya.\",\n      \"sora_prompt\": \"Close-up shot of two coffee cups on a wooden table in a quiet university library. ARYA (short black hair, light blue denim jacket, black digital watch) and RIZKI (medium brown hair, grey knit sweater, thin gold-framed glasses) are sitting opposite each other, avoiding eye contact. The tension is palpable. Soft focus, shallow depth of field, slow zoom out.\",\n      \"veo_prompt\": \"A medium shot showing the strained interaction between ARYA (short black hair, light blue denim jacket, black digital watch) and RIZKI (medium brown hair, grey knit sweater, thin gold-framed glasses) in a dimly lit corner of the library. Rizki is fidgeting with his thin gold-framed glasses. The background is blurred with bookshelves. Consistent character features are maintained.\"\n    },\n    {\n      \"scene\": \"3\",\n      \"title\": \"Pengkhianatan Kecil\",\n      \"dialog_narasi\": \"NARASI (RIZKI): Aku bilang aku akan mundur. Tapi aku tidak bilang aku siap melihatmu maju. Janji 'adil' itu hanya cara Arya mendapatkan Sinta lebih dulu.\",\n      \"sora_prompt\": \"RIZKI (medium brown hair, grey knit sweater, thin gold-framed glasses) stands alone in the rain, looking through a cafe window. Inside, ARYA (short black hair, light blue denim jacket, black digital watch) and SINTA (long honey-brown wavy hair, summer floral dress) are laughing intimately, sharing an earphone. Rizki's expression is one of deep hurt and betrayal. Rainy night aesthetic, neon reflections.\",\n      \"veo_prompt\": \"A panning shot following RIZKI (medium brown hair, grey knit sweater, thin gold-framed glasses) walking away quickly from a brightly lit cafe. His grey knit sweater is slightly damp. The focus is sharp on his back, emphasizing his isolation. The image captures the dynamic contrast between the warmth inside and the cold outside. Consistent character features are maintained.\"\n    },\n    {\n      \"scene\": \"4\",\n      \"title\": \"Konfrontasi di Garasi\",\n      \"dialog_narasi\": \"RIZKI: Kau bilang kau akan menunggu! Kau sudah tahu aku menyukainya sejak awal! ARYA: Aku tidak bisa! Kau terlalu lambat! Jangan salahkan aku karena kau tidak berani bergerak! RIZKI: Ini bukan tentang siapa yang cepat! Ini tentang kita! Tentang janji kita!\",\n      \"sora_prompt\": \"A dramatic, low-angle shot of ARYA (short black hair, light blue denim jacket, black digital watch) and RIZKI (medium brown hair, grey knit sweater, thin gold-framed glasses) arguing fiercely in a dimly lit, echoing parking garage. Their faces are illuminated by a single harsh overhead lamp, highlighting their intense expressions. The tension is explosive. High cinematic contrast, film noir style.\",\n      \"veo_prompt\": \"Close-up profile shots cutting back and forth between ARYA (short black hair, light blue denim jacket, black digital watch) shouting and RIZKI (medium brown hair, grey knit sweater, thin gold-framed glasses) reacting with heartbroken anger. The camera shakes slightly, emphasizing the confrontation. Their consistent clothing (denim jacket vs. grey sweater) is clear. Dynamic handheld camera movement.\"\n    },\n    {\n      \"scene\": \"5\",\n      \"title\": \"Jaket di Pintu\",\n      \"dialog_narasi\": \"NARASI (RIZKI): Setelah semua yang terjadi, kami tidak pernah bicara lagi. Tapi persahabatan tidak mati. Ia hanya berubah wujud. Ia menjadi diam, menjadi jarak, namun tetap menjaga.\",\n      \"sora_prompt\": \"A quiet residential street at dusk. ARYA (short black hair, light blue denim jacket, black digital watch) quickly places his signature light blue denim jacket on the doorknob of RIZKI's house. He rings the bell and immediately walks away, looking back only once. The shot focuses on the denim jacket hanging against the dark wood door. Soft, melancholic lighting.\",\n      \"veo_prompt\": \"RIZKI (medium brown hair, grey knit sweater, thin gold-framed glasses) opens the door, looking pale and sick. He sees the light blue denim jacket hanging there. He slowly picks it up, holding it close. His expression is conflicted – sadness mixed with a quiet understanding of Arya's silent gesture. Indoor lighting is warm and dim. Consistent character features are maintained.\"\n    }\n  ]\n}"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0,
+      "safetyRatings": [
+        {
+          "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          "probability": "NEGLIGIBLE"
+        },
+        {
+          "category": "HARM_CATEGORY_HATE_SPEECH",
+          "probability": "NEGLIGIBLE"
+        },
+        {
+          "category": "HARM_CATEGORY_HARASSMENT",
+          "probability": "NEGLIGIBLE"
+        },
+        {
+          "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+          "probability": "NEGLIGIBLE"
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 389,
+    "candidatesTokenCount": 1559,
+    "totalTokenCount": 2963,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 389
+      }
+    ],
+    "thoughtsTokenCount": 1015
+  },
+  "modelVersion": "gemini-2.5-flash-preview-09-2025",
+  "responseId": "VTMcaYj7G6G_juMPmuuRmQs"
+}
+
+
