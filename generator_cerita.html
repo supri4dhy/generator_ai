@@ -3,110 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator Ide Cerita AI</title>
+    <title>Generator Storyboard Video AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Menggunakan font Inter yang lebih profesional untuk Storyboard -->
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #111827; }
-        textarea::-webkit-scrollbar { width: 8px; }
-        textarea::-webkit-scrollbar-track { background: #1f2937; }
-        textarea::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
-        textarea::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #e2e8f0; } /* Slate-900 */
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
         .spinner {
-            width: 56px; height: 56px;
-            border: 6px solid #4b5563;
-            border-top-color: #ec4899; /* Pink untuk membedakan tema */
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #3b82f6;
             border-radius: 50%;
+            width: 40px; height: 40px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .dropdown-arrow { transition: transform 0.3s ease; }
-        .dropdown-arrow.toggled { transform: rotate(90deg); }
+
+        /* Style untuk Panel Storyboard */
+        .storyboard-panel {
+            background-color: #1e293b; /* Slate-800 */
+            border: 1px solid #334155; /* Slate-700 */
+            transition: all 0.2s;
+        }
+        .storyboard-panel:hover {
+            border-color: #60a5fa; /* Blue-400 */
+            transform: translateY(-2px);
+        }
+        
+        /* Label Input */
+        .input-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #94a3b8; /* Slate-400 */
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Input Field */
+        .custom-input {
+            width: 100%;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            transition: border-color 0.2s;
+        }
+        .custom-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            ring: 2px solid #3b82f6;
+        }
     </style>
 </head>
-<body class="text-gray-100 p-4 sm:p-8">
+<body class="min-h-screen p-4 md:p-8">
 
     <div class="max-w-7xl mx-auto">
         <!-- HEADER -->
-        <header class="mb-6">
-            <h1 class="text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-rose-500">
-                Generator Cerita & Video
-            </h1>
-            <p class="text-center text-gray-400 text-lg mt-2">
-                Ubah Ide Abstrak Menjadi Skenario & Prompt Video Utuh
-            </p>
-            <div class="text-center mt-4">
-                <a href="index.html" class="text-pink-400 hover:text-pink-300 hover:underline transition duration-300">
-                    &larr; Kembali ke Dashboard Utama
-                </a>
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 pb-6 border-b border-gray-700">
+            <div>
+                <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+                    Generator Storyboard Video AI
+                </h1>
+                <p class="text-gray-400 mt-1">Ubah Ide Menjadi Rangkaian Adegan Video (Max 8 Detik)</p>
             </div>
+            <a href="index.html" class="mt-4 md:mt-0 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium transition">
+                &larr; Kembali ke Dashboard
+            </a>
         </header>
 
-        <main id="appStory" class="app-container">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-                <!-- INPUT -->
-                <div class="lg:col-span-4 h-fit bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
-                    <h2 class="text-2xl font-semibold mb-4 text-pink-300">Ide Cerita</h2>
-                    <label for="ideaInput" class="block text-sm font-medium text-gray-400 mb-2">
-                        Tuliskan ide, premis, atau genre cerita Anda.
-                    </label>
-                    <textarea id="ideaInput" rows="12" class="w-full p-3 bg-gray-900 rounded-md border border-gray-700 focus:border-pink-500 focus:ring-pink-500 text-sm" placeholder="Contoh: Sebuah robot pembersih rumah yang jatuh cinta pada pemanggang roti di dunia cyberpunk..."></textarea>
-                    <button id="generateStoryBtn" class="mt-4 w-full bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">
-                        Kembangkan Cerita
-                    </button>
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- SIDEBAR INPUT (KIRI) -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- 1. Ide Cerita -->
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <span class="bg-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">1</span>
+                        Ide Cerita
+                    </h2>
+                    <textarea id="ideaInput" rows="6" class="custom-input text-sm" 
+                        placeholder="Contoh: Seorang pemuda menemukan kacamata VR yang bisa melihat masa depan di sebuah toko barang antik Jakarta..."></textarea>
                 </div>
 
-                <!-- OUTPUT -->
-                <div class="lg:col-span-8">
-                    <div id="outputContainer" class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 min-h-[400px]">
-                        
-                        <div class="flex justify-between items-center mb-5 border-b border-gray-700 pb-4">
-                            <h2 class="text-xl font-semibold text-gray-200">Hasil Pengembangan</h2>
-                            <button id="saveDocStoryBtn" class="hidden bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition duration-300">
-                                Simpan Naskah (.doc)
-                            </button>
-                        </div>
+                <!-- 2. Pengaturan Video (Style & Karakter) -->
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <span class="bg-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">2</span>
+                        Pengaturan Video
+                    </h2>
+                    
+                    <!-- Pilihan Style -->
+                    <div class="mb-5">
+                        <label class="input-label">Gaya Visual (Style)</label>
+                        <select id="styleInput" class="custom-input cursor-pointer">
+                            <option value="Cinematic Realistic">Cinematic Realistic (Film)</option>
+                            <option value="2D Cartoon">2D Cartoon (Kartun 2D)</option> <!-- BARU: Style 2D Cartoon -->
+                            <option value="3D Animation Pixar Style">3D Animation (Pixar Style)</option>
+                            <option value="Anime Studio Ghibli">Anime (Ghibli Style)</option>
+                            <option value="Cyberpunk Futuristic">Cyberpunk Futuristic</option>
+                            <option value="Dark Fantasy">Dark Fantasy</option>
+                            <option value="Vintage 90s Footage">Vintage 90s Footage</option>
+                        </select>
+                    </div>
 
-                        <!-- Konten Hasil -->
-                        <div id="resultArea">
-                            <div id="storyWelcome" class="text-center text-gray-400 py-10">
-                                <p class="text-lg">Tulis ide Anda di sebelah kiri dan biarkan AI berkreasi.</p>
+                    <!-- Input Karakter Dinamis -->
+                    <div>
+                        <label class="input-label flex justify-between items-center">
+                            Tokoh / Karakter
+                            <button onclick="addCharacterField()" class="text-xs text-blue-400 hover:text-blue-300">+ Tambah Tokoh</button>
+                        </label>
+                        <div id="charactersContainer" class="space-y-3">
+                            <!-- Default 1 Karakter -->
+                            <div class="character-entry flex gap-2">
+                                <input type="text" placeholder="Nama (cth: Budi)" class="custom-input w-1/3 text-xs char-name">
+                                <input type="text" placeholder="Ciri fisik (cth: Rambut gondrong, jaket kulit)" class="custom-input w-2/3 text-xs char-desc">
                             </div>
-                            
-                            <div id="loader" class="hidden spinner mx-auto my-10"></div>
-
-                            <!-- Detail Cerita (Judul, Sinopsis, Karakter) -->
-                            <div id="storyMeta" class="hidden mb-8 bg-gray-900 p-5 rounded-lg border border-gray-600">
-                                <h3 id="resTitle" class="text-2xl font-bold text-pink-300 mb-2"></h3>
-                                <p id="resSynopsis" class="text-gray-300 italic mb-4 border-l-4 border-pink-500 pl-3"></p>
-                                <div>
-                                    <h4 class="font-semibold text-gray-400 mb-2">Karakter:</h4>
-                                    <ul id="resCharacters" class="list-disc list-inside text-sm text-gray-300 space-y-1"></ul>
-                                </div>
-                            </div>
-
-                            <!-- Akordeon Adegan -->
-                            <div id="sceneList" class="space-y-3"></div>
                         </div>
+                        <p class="text-xs text-gray-500 mt-2">*Membantu AI menjaga konsistensi wajah/baju.</p>
                     </div>
                 </div>
+
+                <!-- Tombol Generate -->
+                <button id="generateBtn" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:scale-[1.02]">
+                    GENERATE STORYBOARD
+                </button>
             </div>
+
+            <!-- AREA OUTPUT (KANAN) -->
+            <div class="lg:col-span-8">
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 min-h-[600px] relative">
+                    
+                    <!-- Header Output -->
+                    <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+                        <h2 class="text-xl font-bold text-white">Hasil Storyboard</h2>
+                        <button id="saveDocBtn" class="hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                            Download .doc
+                        </button>
+                    </div>
+
+                    <!-- State: Loading -->
+                    <div id="loader" class="hidden absolute inset-0 bg-gray-800/90 z-10 flex flex-col items-center justify-center rounded-xl">
+                        <div class="spinner mb-4"></div>
+                        <p class="text-blue-400 font-medium animate-pulse">AI sedang merancang adegan & dialog...</p>
+                    </div>
+
+                    <!-- State: Empty -->
+                    <div id="emptyState" class="text-center py-20 text-gray-500">
+                        <svg class="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path></svg>
+                        <p>Belum ada storyboard.</p>
+                    </div>
+
+                    <!-- State: Result -->
+                    <div id="resultContent" class="hidden space-y-8">
+                        
+                        <!-- Meta Info -->
+                        <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+                            <h1 id="resTitle" class="text-2xl font-bold text-blue-300 mb-2"></h1>
+                            <p id="resSynopsis" class="text-gray-400 text-sm leading-relaxed"></p>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Karakter Terdaftar:</h4>
+                                <div id="resCharacters" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- Scene List -->
+                        <div id="sceneList" class="space-y-4">
+                            <!-- Scenes will be injected here -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
         </main>
     </div>
 
     <script>
-        let currentStoryData = null;
+        let currentData = null;
+
+        // Tambah kolom karakter
+        function addCharacterField() {
+            const container = document.getElementById('charactersContainer');
+            const div = document.createElement('div');
+            div.className = 'character-entry flex gap-2';
+            div.innerHTML = `
+                <input type="text" placeholder="Nama" class="custom-input w-1/3 text-xs char-name">
+                <input type="text" placeholder="Ciri fisik" class="custom-input w-2/3 text-xs char-desc">
+                <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-400 px-1">&times;</button>
+            `;
+            container.appendChild(div);
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const generateBtn = document.getElementById('generateStoryBtn');
-            const ideaInput = document.getElementById('ideaInput');
-            const saveBtn = document.getElementById('saveDocStoryBtn');
+            const generateBtn = document.getElementById('generateBtn');
+            const saveBtn = document.getElementById('saveDocBtn');
             
-            const dom = {
-                welcome: document.getElementById('storyWelcome'),
+            const ui = {
+                empty: document.getElementById('emptyState'),
                 loader: document.getElementById('loader'),
-                meta: document.getElementById('storyMeta'),
+                content: document.getElementById('resultContent'),
                 title: document.getElementById('resTitle'),
                 synopsis: document.getElementById('resSynopsis'),
                 chars: document.getElementById('resCharacters'),
@@ -114,138 +217,190 @@
             };
 
             generateBtn.addEventListener('click', async () => {
-                const idea = ideaInput.value;
-                if (!idea.trim()) { alert('Ide cerita tidak boleh kosong!'); return; }
+                const idea = document.getElementById('ideaInput').value;
+                const style = document.getElementById('styleInput').value;
+                
+                // Kumpulkan data karakter
+                const charEntries = document.querySelectorAll('.character-entry');
+                let charList = [];
+                charEntries.forEach(entry => {
+                    const name = entry.querySelector('.char-name').value.trim();
+                    const desc = entry.querySelector('.char-desc').value.trim();
+                    if (name) charList.push(`${name} (${desc})`);
+                });
 
-                // Reset UI
-                dom.welcome.classList.add('hidden');
-                dom.meta.classList.add('hidden');
-                dom.scenes.innerHTML = '';
+                if (!idea.trim()) { alert('Ide cerita wajib diisi!'); return; }
+
+                // UI State: Loading
+                ui.empty.classList.add('hidden');
+                ui.content.classList.add('hidden');
                 saveBtn.classList.add('hidden');
-                dom.loader.classList.remove('hidden');
+                ui.loader.classList.remove('hidden');
                 generateBtn.disabled = true;
-                generateBtn.innerText = "Sedang Mengarang...";
+                generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
                 try {
                     const response = await fetch('api_proxy.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ task: 'story_idea', script: idea })
+                        body: JSON.stringify({ 
+                            task: 'story_idea', 
+                            script: idea,
+                            style: style,
+                            characters: charList.join(', ') 
+                        })
                     });
 
-                    if (!response.ok) throw new Error('Gagal menghubungi server');
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ error: 'Respons server tidak valid' }));
+                        throw new Error(errorData.message || errorData.error || `HTTP error ${response.status}`);
+                    }
                     const data = await response.json();
 
-                    if (data.error) throw new Error(data.error);
+                    // Cek error logis dari API (misal dari Gemini)
+                    if (data.error) throw new Error(data.error.message || data.error);
                     
-                    currentStoryData = data;
-                    renderStory(data);
+                    // Validasi struktur data
+                    if (!data || typeof data !== 'object') throw new Error("Data yang diterima dari server tidak valid.");
+
+                    currentData = data;
+                    renderResult(data);
 
                 } catch (err) {
                     console.error(err);
-                    dom.scenes.innerHTML = `<div class="bg-red-900 text-red-200 p-4 rounded">Error: ${err.message}</div>`;
+                    alert(`Terjadi kesalahan: ${err.message}`);
+                    ui.empty.classList.remove('hidden');
                 } finally {
-                    dom.loader.classList.add('hidden');
+                    ui.loader.classList.add('hidden');
                     generateBtn.disabled = false;
-                    generateBtn.innerText = "Kembangkan Cerita";
-                }
-            });
-
-            // Event Listener Akordeon
-            dom.scenes.addEventListener('click', (e) => {
-                const btn = e.target.closest('.scene-toggle');
-                if (btn) {
-                    const content = document.getElementById(btn.dataset.target);
-                    const arrow = btn.querySelector('.dropdown-arrow');
-                    content.classList.toggle('hidden');
-                    arrow.classList.toggle('toggled');
+                    generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
             });
 
             saveBtn.addEventListener('click', () => {
-                if(currentStoryData) saveAsDoc(currentStoryData);
+                if(currentData) saveAsDoc(currentData);
             });
         });
 
-        function renderStory(data) {
-            const dom = {
-                meta: document.getElementById('storyMeta'),
+        function renderResult(data) {
+            const ui = {
                 title: document.getElementById('resTitle'),
                 synopsis: document.getElementById('resSynopsis'),
                 chars: document.getElementById('resCharacters'),
-                scenes: document.getElementById('sceneList')
+                scenes: document.getElementById('sceneList'),
+                content: document.getElementById('resultContent'),
+                saveBtn: document.getElementById('saveDocBtn')
             };
 
-            // Render Meta
-            dom.title.innerText = data.judul;
-            dom.synopsis.innerText = data.sinopsis;
-            dom.chars.innerHTML = data.karakter.map(c => `<li>${c}</li>`).join('');
-            dom.meta.classList.remove('hidden');
-
-            // Render Scenes
-            const scenesHtml = data.scenes.map((s, i) => {
-                const contentId = `scene-content-${i}`;
-                return `
-                    <div class="bg-gray-900 rounded border border-gray-700 overflow-hidden">
-                        <button class="scene-toggle w-full text-left p-4 flex justify-between items-center hover:bg-gray-800 transition" data-target="${contentId}">
-                            <h4 class="text-lg font-bold text-pink-300">Adegan ${s.scene}: ${s.title}</h4>
-                            <svg class="dropdown-arrow w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </button>
-                        <div id="${contentId}" class="hidden p-4 border-t border-gray-700 space-y-4">
-                            ${renderCopyItem('Dialog / Narasi (ID)', `nar-${i}`, s.dialog_narasi, true)}
-                            ${renderCopyItem('Prompt SORA (EN)', `sora-${i}`, s.sora_prompt, true)}
-                            ${renderCopyItem('Prompt VEO (EN)', `veo-${i}`, s.veo_prompt, true)}
+            // --- PERBAIKAN UTAMA: Safety Check sebelum menggunakan .map() ---
+            
+            // 1. Render Meta Info
+            ui.title.innerText = data.judul || "Judul Tidak Tersedia";
+            ui.synopsis.innerText = data.sinopsis || "Sinopsis tidak tersedia.";
+            
+            // 2. Render Karakter (Safety Check)
+            if (Array.isArray(data.karakter_detail) && data.karakter_detail.length > 0) {
+                ui.chars.innerHTML = data.karakter_detail.map(c => `
+                    <div class="flex items-start bg-gray-800 p-2 rounded border border-gray-700">
+                        <div class="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center text-xs font-bold mr-2 shrink-0">
+                            ${(c.nama || '?').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-200">${c.nama || 'Tanpa Nama'}</p>
+                            <p class="text-[10px] text-gray-500">${c.deskripsi_visual || '-'}</p>
                         </div>
                     </div>
-                `;
-            }).join('');
-            
-            dom.scenes.innerHTML = scenesHtml;
-            document.getElementById('saveDocStoryBtn').classList.remove('hidden');
-        }
+                `).join('');
+            } else {
+                ui.chars.innerHTML = '<p class="text-gray-500 text-xs italic">Tidak ada detail karakter.</p>';
+            }
 
-        function renderCopyItem(label, id, text, isArea) {
-            const input = isArea 
-                ? `<textarea id="${id}" readonly class="w-full h-24 p-2 bg-gray-950 border border-gray-700 rounded text-sm text-gray-300">${text}</textarea>`
-                : `<input id="${id}" readonly value="${text}" class="w-full p-2 bg-gray-950 border border-gray-700 rounded text-sm text-gray-300">`;
-            
-            return `
-                <div>
-                    <div class="flex justify-between mb-1">
-                        <span class="text-xs font-semibold text-gray-500 uppercase">${label}</span>
-                        <button onclick="copyText('${id}', this)" class="text-xs text-pink-400 hover:text-white">Salin</button>
+            // 3. Render Scenes (Safety Check)
+            if (Array.isArray(data.scenes) && data.scenes.length > 0) {
+                ui.scenes.innerHTML = data.scenes.map((s, i) => `
+                    <div class="storyboard-panel rounded-lg p-4 relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">
+                                SCENE ${s.scene_num || (i+1)}
+                            </span>
+                            <span class="text-xs font-mono text-gray-400 border border-gray-600 px-2 py-1 rounded">
+                                ⏱ ${s.durasi_estimasi || '-'}
+                            </span>
+                        </div>
+                        
+                        <!-- Dialog Box -->
+                        <div class="bg-gray-900/80 p-3 rounded border-l-4 border-green-500 mb-4">
+                            <p class="text-xs text-gray-500 uppercase mb-1 font-bold">Dialog / Narasi (ID):</p>
+                            <p class="text-sm text-gray-200 italic">"${s.dialog_narasi || ''}"</p>
+                            <button onclick="copyText('${(s.dialog_narasi || '').replace(/'/g, "\\'")}', this)" class="text-[10px] text-green-400 hover:text-green-300 mt-2">Salin Dialog</button>
+                        </div>
+
+                        <!-- Prompt Box -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                            <div>
+                                <p class="text-[10px] text-blue-400 font-bold mb-1 uppercase">Prompt SORA:</p>
+                                <div class="bg-black p-2 rounded text-xs text-gray-400 font-mono h-20 overflow-y-auto border border-gray-800">
+                                    ${s.sora_prompt || ''}
+                                </div>
+                                <button onclick="copyText('${(s.sora_prompt || '').replace(/'/g, "\\'")}', this)" class="text-[10px] text-blue-500 hover:text-blue-400 mt-1 block">Salin Prompt SORA</button>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-purple-400 font-bold mb-1 uppercase">Prompt VEO:</p>
+                                <div class="bg-black p-2 rounded text-xs text-gray-400 font-mono h-20 overflow-y-auto border border-gray-800">
+                                    ${s.veo_prompt || ''}
+                                </div>
+                                <button onclick="copyText('${(s.veo_prompt || '').replace(/'/g, "\\'")}', this)" class="text-[10px] text-purple-500 hover:text-purple-400 mt-1 block">Salin Prompt VEO</button>
+                            </div>
+                        </div>
                     </div>
-                    ${input}
-                </div>
-            `;
+                `).join('');
+            } else {
+                ui.scenes.innerHTML = '<p class="text-center text-gray-400">Gagal menghasilkan adegan.</p>';
+            }
+
+            ui.content.classList.remove('hidden');
+            ui.saveBtn.classList.remove('hidden');
         }
 
-        function copyText(id, btn) {
-            const el = document.getElementById(id);
-            el.select();
-            document.execCommand('copy');
-            const original = btn.innerText;
-            btn.innerText = 'Tersalin!';
-            setTimeout(() => btn.innerText = original, 2000);
+        function copyText(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const original = btn.innerText;
+                btn.innerText = "Tersalin!";
+                setTimeout(() => btn.innerText = original, 1500);
+            });
         }
 
         function saveAsDoc(data) {
-            let content = `<html><head><meta charset='UTF-8'></head><body>`;
-            content += `<h1>${data.judul}</h1><p><strong>Sinopsis:</strong> ${data.sinopsis}</p>`;
-            content += `<h3>Karakter:</h3><ul>${data.karakter.map(c=>`<li>${c}</li>`).join('')}</ul><hr>`;
+            let content = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>${data.judul || 'Storyboard'}</title>
+            <style>
+                body{font-family:Arial,sans-serif}
+                .scene{border:1px solid #999;padding:10px;margin-bottom:15px;background:#f9f9f9}
+                .meta{margin-bottom:20px;border-bottom:2px solid #333;padding-bottom:10px}
+            </style></head><body>`;
             
-            data.scenes.forEach(s => {
-                content += `<h3>Adegan ${s.scene}: ${s.title}</h3>`;
-                content += `<p><strong>Dialog/Narasi:</strong><br>${s.dialog_narasi.replace(/\n/g, '<br>')}</p>`;
-                content += `<p><strong>Prompt SORA:</strong><br>${s.sora_prompt}</p>`;
-                content += `<p><strong>Prompt VEO:</strong><br>${s.veo_prompt}</p><br>`;
-            });
+            content += `<div class='meta'><h1>${data.judul || 'Tanpa Judul'}</h1><p><strong>Sinopsis:</strong> ${data.sinopsis || '-'}</p>`;
             
+            if (Array.isArray(data.karakter_detail)) {
+                content += `<h3>Daftar Karakter:</h3><ul>${data.karakter_detail.map(c=>`<li><b>${c.nama || 'Tokoh'}:</b> ${c.deskripsi_visual || '-'}</li>`).join('')}</ul></div>`;
+            }
+            
+            if (Array.isArray(data.scenes)) {
+                data.scenes.forEach(s => {
+                    content += `<div class='scene'>
+                        <h3>SCENE ${s.scene_num || '?'} (${s.durasi_estimasi || '-'})</h3>
+                        <p><strong>Dialog/Narasi (ID):</strong><br><em>"${s.dialog_narasi || ''}"</em></p>
+                        <p><strong>Prompt SORA (EN):</strong><br>${s.sora_prompt || ''}</p>
+                        <p><strong>Prompt VEO (EN):</strong><br>${s.veo_prompt || ''}</p>
+                    </div>`;
+                });
+            }
+
             content += `</body></html>`;
             const blob = new Blob(['\ufeff', content], {type: 'application/msword'});
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `Cerita_${data.judul.replace(/\s+/g, '_')}.doc`;
+            const safeTitle = (data.judul || 'storyboard').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            link.download = `Storyboard_${safeTitle}.doc`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
